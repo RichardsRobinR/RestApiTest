@@ -46,9 +46,36 @@ namespace RestApiTest
 
             Bitmap bitmap = new Bitmap(@"C:\Users\richa\Downloads\3.jpg");
 
-            this.listView1.LargeImageList.Images.Add(Image.FromFile(@"C:\Users\richa\Downloads\3.jpg"));
+            //this.listView1.LargeImageList.Images.Add(Image.FromFile(@"C:\Users\richa\Downloads\3.jpg"));
 
             this.pictureBox1.Image = bitmap;
+
+            this.pokemon_ListView.View = View.Details;
+
+
+            ListViewItem item1 = new ListViewItem();
+            
+           
+            item1.SubItems.Add("1");
+            item1.SubItems.Add("2");
+            item1.SubItems.Add("3");
+
+
+            this.pokemon_ListView.Columns.Add("Column 2");
+            this.pokemon_ListView.Columns.Add("Column 3");
+            this.pokemon_ListView.Columns.Add("Column 4");
+            this.pokemon_ListView.Columns.Add("Column 4");
+            ImageList imageListLarge = new ImageList();
+
+            this.pokemon_ListView.Items.AddRange(new ListViewItem[] { item1 });
+
+            imageListLarge.Images.Add(Image.FromFile(@"C:\Users\richa\Downloads\3.jpg"));
+           // imageListLarge.Images.Add(bitmap);
+            //imageListLarge.Images.Add(bitmap);
+
+            //Assign the ImageList objects to the ListView.
+            this.pokemon_ListView.LargeImageList = imageListLarge;
+
 
         }
 
@@ -77,7 +104,7 @@ namespace RestApiTest
 
             for (int i = 0; i < personList.Count; i++)
             {
-                this.listBox1.Items.Add(personList[i].capital);
+                //this.listBox1.Items.Add(personList[i].capital);
                 //this.listBox1.Text = personList[0].name;
             }
             //this.listBox1.Items.Add(personList[0].name);
@@ -107,7 +134,7 @@ namespace RestApiTest
 
                 //var pokename = pokemonList[0].Next
             {
-                this.listBox1.Items.Add(pokemonList.Results[i].Name);
+               // this.listBox1.Items.Add(pokemonList.Results[i].Name);
                 //this.listBox1.Text = personList[0].name;
             }
             //this.listBox1.Items.Add(personList[0].name);

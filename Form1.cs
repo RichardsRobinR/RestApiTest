@@ -139,7 +139,7 @@ namespace RestApiTest
 
             for (int i = 0; i < personList.Count; i++)
             {
-                this.listBox1.Items.Add(personList[i].capital);
+               // this.listBox1.Items.Add(personList[i].capital);
                 //this.listBox1.Text = personList[0].name;
             }
             //this.listBox1.Items.Add(personList[0].name);
@@ -169,7 +169,7 @@ namespace RestApiTest
 
                 //var pokename = pokemonList[0].Next
             {
-                this.listBox1.Items.Add(pokemonList.Results[i].Name);
+               // this.listBox1.Items.Add(pokemonList.Results[i].Name);
                 //this.listBox1.Text = personList[0].name;
             }
             //this.listBox1.Items.Add(personList[0].name);

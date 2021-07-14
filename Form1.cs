@@ -14,6 +14,8 @@ using System.Net.Http.Headers;
 using System.Net.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Bson;
+using System.Net;
+using System.IO;
 
 namespace RestApiTest
 {
@@ -28,54 +30,12 @@ namespace RestApiTest
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //getpokemon();
-            Graphics g = Graphics.FromHwnd(this.Handle);
+            listView1.View = View.Details;
 
-
-
-           this.imageList1.Images.Add(Image.FromFile(@"C:\Users\richa\Downloads\3.jpg"));
-
-            this.imageList1.ImageSize = new Size(256, 256);
-
-
-            //this.imageList1.Draw(g, new Point(40, 40),0);
-
-            //this.pictureBox1.Image = this.imageList1.Images[0];
-
-            //this.listBox1.Items.Add(this.imageList1.Images[0]);
-
-            Bitmap bitmap = new Bitmap(@"C:\Users\richa\Downloads\3.jpg");
-
-            //this.listView1.LargeImageList.Images.Add(Image.FromFile(@"C:\Users\richa\Downloads\3.jpg"));
-
-            this.pictureBox1.Image = bitmap;
-
-            this.pokemon_ListView.View = View.Details;
-
-
-            ListViewItem item1 = new ListViewItem();
-            
            
-            item1.SubItems.Add("1");
-            item1.SubItems.Add("2");
-            item1.SubItems.Add("3");
 
-
-            this.pokemon_ListView.Columns.Add("Column 2");
-            this.pokemon_ListView.Columns.Add("Column 3");
-            this.pokemon_ListView.Columns.Add("Column 4");
-            this.pokemon_ListView.Columns.Add("Column 4");
-            ImageList imageListLarge = new ImageList();
-
-            this.pokemon_ListView.Items.AddRange(new ListViewItem[] { item1 });
-
-            imageListLarge.Images.Add(Image.FromFile(@"C:\Users\richa\Downloads\3.jpg"));
-           // imageListLarge.Images.Add(bitmap);
-            //imageListLarge.Images.Add(bitmap);
-
-            //Assign the ImageList objects to the ListView.
-            this.pokemon_ListView.LargeImageList = imageListLarge;
-
+            getpokemon();
+  
 
         }
 
@@ -113,51 +73,71 @@ namespace RestApiTest
 
         public async void getpokemon()
         {
-            var client = new HttpClient { BaseAddress = new Uri("https://pokeapi.co/api/v2/") };
+
+            ImageList imageListSmall = new ImageList();
+
+            imageListSmall.ImageSize = new Size(50, 50);
+
+            listView1.SmallImageList = imageListSmall;
+
+            List<string> imageurl = new List<string>();
+
+
+            var client = new HttpClient { BaseAddress = new Uri("https://api.jsonbin.io/") };
 
             // Assign default header (Json Serialization)
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Make an API call and receive HttpResponseMessage
-            var responseMessage = await client.GetAsync("pokemon?offset=0&limit=100", HttpCompletionOption.ResponseContentRead);
+            var responseMessage = await client.GetAsync("b/60772efa0ed6f819beac4c31", HttpCompletionOption.ResponseContentRead);
 
             // Convert the HttpResponseMessage to string
             var resultArray = await responseMessage.Content.ReadAsStringAsync();
-
 
 
             // Deserialize the Json string into type using JsonConvert
             var pokemonList = JsonConvert.DeserializeObject<Pokedex>(resultArray);
 
 
-            for (int i = 0; i < pokemonList.Results.Count; i++)
+            listView1.Columns.Add("ID");
+            listView1.Columns.Add("Name");
 
-                //var pokename = pokemonList[0].Next
+            WebClient webClient = new WebClient();
+
+            for (int i = 0; i < 20; i++)
             {
-               // this.listBox1.Items.Add(pokemonList.Results[i].Name);
-                //this.listBox1.Text = personList[0].name;
+                
+                    /* WebRequest request = WebRequest.Create(pokemonList.Pokemon[i].Imageurl);
+                     WebResponse resp = request.GetResponse();
+                     respStream = resp.GetResponseStream();
+                     bmp = new Bitmap(respStream);
+ 
+                     respStream.Dispose();*/
+
+
+                // adding url to string list
+                imageurl.Add(pokemonList.Pokemon[i].Imageurl.ToString());
+
+
+                var imageByte = webClient.DownloadData(imageurl[i]);
+                MemoryStream memoryStream = new MemoryStream(imageByte);
+
+
+                Image image = Image.FromStream(memoryStream);
+                imageListSmall.Images.Add(image);
+                ListViewItem item1 = new ListViewItem(pokemonList.Pokemon[i].Id);
+                item1.SubItems.Add(pokemonList.Pokemon[i].Name);
+                listView1.Items.Add(item1);
+                item1.ImageIndex = i;
+                //imageListSmall.Images.Add(image);
+                
+
+
             }
-            //this.listBox1.Items.Add(personList[0].name);
-            //this.listBox1.Text = personList[0].name;
+
         }
     
 
-
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            List<RestCountry> testcountry = new List<RestCountry>();
-
-
-            //RestCountry restCountry = testcountry[0].Name as RestCountry;
-
-            //this.textBox1.Text = per;
-        }
-
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
     }
 
     public class RestCountry
@@ -196,34 +176,38 @@ namespace RestApiTest
     //
     // To parse this JSON data, add NuGet 'Newtonsoft.Json' then do:
     //
-   
 
 
-        public class Pokedex
-        {
-            
-            public long Count { get; set; }
 
-          
-            public Uri Next { get; set; }
+    public partial class Pokedex
+    {
 
-           
-            public Uri Previous { get; set; }
+        public Pokemon[] Pokemon { get; set; }
+    }
 
-            
-            public List<Result> Results { get; set; }
-        }
+    public partial class Pokemon
+    {
 
-        public  class Result
-        {
-            
-            public string Name { get; set; }
+        public string Name { get; set; }
 
-           
-            public Uri Url { get; set; }
-        }
+        public string Id { get; set; }
 
-        
-    
 
-}
+        public Uri Imageurl { get; set; }
+
+        public string Xdescription { get; set; }
+
+        public string Ydescription { get; set; }
+
+
+        public string Height { get; set; }
+
+
+        public string Category { get; set; }
+
+        public string Weight { get; set; }
+
+    }
+
+
+    }

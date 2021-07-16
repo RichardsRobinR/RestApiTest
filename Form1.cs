@@ -22,7 +22,7 @@ namespace RestApiTest
     public partial class Form1 : Form
     {
         private const string V = "https://restcountries.eu/rest/v2";
-
+       
         public Form1()
         {
             InitializeComponent();
@@ -31,12 +31,22 @@ namespace RestApiTest
         private void Form1_Load(object sender, EventArgs e)
         {
             listView1.View = View.Details;
+            ImageList imageListSmall = new ImageList();
+
+            imageListSmall.ImageSize = new Size(50, 50);
+
+            listView1.SmallImageList = imageListSmall;
+            listView1.Columns.Add("ID");
+            listView1.Columns.Add("Name");
+
+            this.listView1.Visible = true;
+
+            var t = Task.Run(() => getpokemon(imageListSmall));
+            
+            
+            //getpokemon(imageListSmall);
 
            
-
-            getpokemon();
-  
-
         }
 
 
@@ -71,25 +81,19 @@ namespace RestApiTest
             //this.listBox1.Text = personList[0].name;
         }
 
-        public async void getpokemon()
+        public async void getpokemon(dynamic imageListSmall)
         {
 
-            ImageList imageListSmall = new ImageList();
-
-            imageListSmall.ImageSize = new Size(50, 50);
-
-            listView1.SmallImageList = imageListSmall;
 
             List<string> imageurl = new List<string>();
 
+            WebClient webClient = new WebClient();
+            MemoryStream memoryStream;
 
-            var client = new HttpClient { BaseAddress = new Uri("https://api.jsonbin.io/") };
-
-            // Assign default header (Json Serialization)
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            HttpClient httpclient = new HttpClient();
 
             // Make an API call and receive HttpResponseMessage
-            var responseMessage = await client.GetAsync("b/60772efa0ed6f819beac4c31", HttpCompletionOption.ResponseContentRead);
+            var responseMessage = await httpclient.GetAsync("https://api.jsonbin.io/b/60772efa0ed6f819beac4c31");
 
             // Convert the HttpResponseMessage to string
             var resultArray = await responseMessage.Content.ReadAsStringAsync();
@@ -99,14 +103,15 @@ namespace RestApiTest
             var pokemonList = JsonConvert.DeserializeObject<Pokedex>(resultArray);
 
 
-            listView1.Columns.Add("ID");
-            listView1.Columns.Add("Name");
-
-            WebClient webClient = new WebClient();
-
-            for (int i = 0; i < 20; i++)
+           
+            try
             {
                 
+                       
+
+                for (int i = 0; i < 40; i++)
+                {
+
                     /* WebRequest request = WebRequest.Create(pokemonList.Pokemon[i].Imageurl);
                      WebResponse resp = request.GetResponse();
                      respStream = resp.GetResponseStream();
@@ -115,29 +120,63 @@ namespace RestApiTest
                      respStream.Dispose();*/
 
 
-                // adding url to string list
-                imageurl.Add(pokemonList.Pokemon[i].Imageurl.ToString());
+                    // adding url to string list
+                    imageurl.Add(pokemonList.Pokemon[i].Imageurl.ToString());
+
+                    if (listView1.InvokeRequired)
+                    {
+                        listView1.Invoke((MethodInvoker)delegate ()
+                        {
+
+                            ListViewItem item1 = new ListViewItem(pokemonList.Pokemon[i].Id);
+                            item1.SubItems.Add(pokemonList.Pokemon[i].Name);
+                            listView1.Items.Add(item1);
+                            item1.ImageIndex = i;
+
+                        });
+                    }
+                    
+                    byte[] imageByte = webClient.DownloadData(imageurl[i]);
+                    memoryStream = new MemoryStream(imageByte);
+
+                    Image image = Image.FromStream(memoryStream);
+                    imageListSmall.Images.Add(image);
+
+                  
 
 
-                var imageByte = webClient.DownloadData(imageurl[i]);
-                MemoryStream memoryStream = new MemoryStream(imageByte);
 
-
-                Image image = Image.FromStream(memoryStream);
-                imageListSmall.Images.Add(image);
-                ListViewItem item1 = new ListViewItem(pokemonList.Pokemon[i].Id);
-                item1.SubItems.Add(pokemonList.Pokemon[i].Name);
-                listView1.Items.Add(item1);
-                item1.ImageIndex = i;
-                //imageListSmall.Images.Add(image);
-                
-
-
+                }
+                    
             }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+            finally
+            {
+                webClient.Dispose();
+                
+               
+            }
+            
+           
 
         }
-    
 
+        private void listview_colownWitdh(object sender, ColumnWidthChangingEventArgs e)
+        {
+            e.Cancel = true;
+            e.NewWidth = 120;
+        }
+
+  
+
+        private void progressBar1_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 
     public class RestCountry
